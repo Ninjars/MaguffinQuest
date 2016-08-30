@@ -11,31 +11,16 @@
 
 <tw-story></tw-story>
 
-<tw-storydata name="Maguffin Quest" startnode="18" creator="Twine" creator-version="2.0.11" ifid="874805F8-1FC3-4CF7-BFB8-0DCA65FB5863" format="Harlowe" options="" hidden><style role="stylesheet" id="twine-user-stylesheet" type="text/twine-css">
+<tw-storydata name="Maguffin Quest" startnode="10" creator="Twine" creator-version="2.0.11" ifid="874805F8-1FC3-4CF7-BFB8-0DCA65FB5863" format="Harlowe" options="" hidden><style role="stylesheet" id="twine-user-stylesheet" type="text/twine-css">
+
+
 
 </style><script role="script" id="twine-user-script" type="text/twine-javascript">
 
-</script><tw-passagedata pid="1" name="Section A" tags="" position="800,600">[[a1]]</tw-passagedata>
-<tw-passagedata pid="2" name="a1" tags="" position="800,750">[[a2.1]]
-[[a2.2]]</tw-passagedata>
-<tw-passagedata pid="3" name="a2.1" tags="" position="900,900">a2.1
 
-(link-goto: &quot;Continue&quot;, &quot;Auto Next Section&quot;)</tw-passagedata>
-<tw-passagedata pid="4" name="a2.2" tags="" position="700,900">a2.2
 
-(link-goto: &quot;Continue&quot;, &quot;Auto Next Section&quot;)</tw-passagedata>
-<tw-passagedata pid="5" name="Section B" tags="" position="1200,600">[[b1.1]]
-[[b1.2]]</tw-passagedata>
-<tw-passagedata pid="6" name="b1.1" tags="" position="1300,750">b1.1
-
-(link-goto: &quot;Continue&quot;, &quot;Auto Next Section&quot;)</tw-passagedata>
-<tw-passagedata pid="7" name="b1.2" tags="" position="1100,750">b1.2
-
-(link-goto: &quot;Continue&quot;, &quot;Auto Next Section&quot;)</tw-passagedata>
-<tw-passagedata pid="8" name="Section C" tags="" position="1500,600">C
-
-(link-goto: &quot;Continue&quot;, &quot;Auto Next Section&quot;)</tw-passagedata>
-<tw-passagedata pid="9" name="Auto Next Section" tags="" position="500.0001,250">(display: removeReputation)
+</script><tw-passagedata pid="1" name="Auto Next Section" tags="" position="500,250">&lt;!-- reset gameoverReason when we move to a new section --&gt; 
+(set: $gameoverReason = &quot;&quot;)
 (if: $introductions.length &gt; 0)[
 	&lt;!-- If we have introductions to make, do those first --&gt;
 	(set: $introductions to (shuffled: ...$introductions))
@@ -47,27 +32,32 @@
 ](else:)[
 	(set: $gameoverReason to &#39;Your decisions have cause changes far and wide, but there is only so much one person can do. Eventually we all run out of choices, and our tale ends.&#39;)
 ]</tw-passagedata>
-<tw-passagedata pid="10" name="Footer" tags="footer" position="300,250">
+<tw-passagedata pid="2" name="Footer" tags="footer" position="300,250">
 ----
-Footer
-
 Reputation: $reputation
 (set: $totalShipsCount = $totalShips.length)
 Total ship count: $totalShipsCount
-Available ships: (print: $totalShips.join(&quot;, &quot;))</tw-passagedata>
-<tw-passagedata pid="11" name="Startup" tags="startup" position="300,100">&lt;!-- Story sections are the means to procedurally construct a story.
+Available ships: (print: $availableShips.join(&quot;, &quot;))</tw-passagedata>
+<tw-passagedata pid="3" name="Startup" tags="startup" position="303,99">{
+&lt;!-- Story sections are the means to procedurally construct a story.
 
 Starting from a few threads, new sections can be added at any point and will be shuffled in to the mix randomly upon conclusion of the current thread.
 
 Any given thread could add one, multiple or no sections. If multiple sections are added, consider that the order in which they are added will not matter. They should be written in such a way that they can happen independently, possibly separated by many other sections.
 
 If the sections pool runs empty, the story is over. --&gt;
-(set: $storySections to (a: &quot;Section A&quot;, &quot;Section B&quot;, &quot;Section C&quot;))
+(set: $storySections to (a: &quot;Construct New Ship&quot;))
 (set: $introductions to (a: &quot;Introduction: Merchants&quot;))
 
-&lt;!-- ships will be used to take direct actions; they are a resource that allows certain action types (exploring, combat), and if you lose them all you will no longer be able to enforce or enact your will --&gt;
+&lt;!-- ships will be used to take direct actions; they are a resource that allows certain action types (exploring, combat), and if you lose them all you will no longer be able to enforce or enact your will.
+New ships are added to the end of the queue, and when a ship returns or is lost on mission the first ship in the list is shifted out to be selected.
+--&gt;
 (set: $totalShips to (a: &#39;ship 1&#39;, &#39;ship 2&#39;))
-(set: $availableShips to (a: ))
+(set: $availableShips to $totalShips)
+(set: $shipMissionQueue to (a:))
+
+&lt;!-- ships are generally pretty hardy, but survival is not guaranteed. This value is based on a 1-12 scale, and used in shipMissionEnded; ship survives on a random roll less than or equal to this value --&gt;
+(set: $shipSurvival to 8)
 
 &lt;!-- funds are used to provision, support, procure and influence, and could be gained from a range of actions --&gt;
 (set: $funds to 10)
@@ -81,24 +71,28 @@ If the sections pool runs empty, the story is over. --&gt;
 
 &lt;!-- standings can be used to track influence with different aspects of the administration, allowing different options or even just flavour text to be used based on an abstraction of past interactions --&gt;
 (set: $standingMerchants = 0)
-(set: $standingPoliticians = 0)</tw-passagedata>
-<tw-passagedata pid="12" name="addReputation" tags="" position="300,400">&lt;!-- this can be called to run using a simple (display: &lt;title&gt;) line --&gt;
+(set: $standingPoliticians = 0)
+
+&lt;!-- gameoverReason can be set to override a default gameover text, eg when you know a condition may cause a game over and you want to say something special --&gt; 
+(set: $gameoverReason = &quot;&quot;)
+}</tw-passagedata>
+<tw-passagedata pid="4" name="addReputation" tags="" position="300,400">&lt;!-- this can be called to run using a simple (display: &lt;title&gt;) line --&gt;
 (if: $reputation &lt; $reputationMax)[
 	(set: $reputation to it + 1)
 ](else:)[
 	(set: $reputation to $reputationMax)
 ]</tw-passagedata>
-<tw-passagedata pid="13" name="removeReputation" tags="" position="300.0001,550">&lt;!-- this can be called to run using a simple (display: &lt;title&gt;) line --&gt;
+<tw-passagedata pid="5" name="removeReputation" tags="" position="300,550">&lt;!-- this can be called to run using a simple (display: &lt;title&gt;) line --&gt;
 &lt;!-- having no reputation left ends the game! --&gt;
 (set: $reputation to it - 1)
 (if: $reputation &lt;= 0)[
 	(set: $gameoverReason to &#39;Your reputation is in ruins, your name laughed at in pubs and your story told as a cautionary tale to the young and impetuous&#39;)
 	(goto: gameover)
 ]</tw-passagedata>
-<tw-passagedata pid="14" name="gameover" tags="" position="500.0001,400">Your story has ended.
+<tw-passagedata pid="6" name="gameover" tags="" position="500,400">Your story has ended.
 
 (print: $gameoverReason)</tw-passagedata>
-<tw-passagedata pid="15" name="addShip" tags="" position="500,550">&lt;!-- naviagte here to add a new ship.  After creating the ship, the navigation will return to the auto-chooser unless $nextPassage is set --&gt;
+<tw-passagedata pid="7" name="addShip" tags="" position="450,700">&lt;!-- naviagte here to add a new ship.  After creating the ship, the navigation will return to the auto-chooser unless $nextPassage is set --&gt;
 
 (put: (prompt: &quot;Give your new ship a unique name!&quot;) into $newShip)
 
@@ -117,7 +111,7 @@ $newShip will be a fine addition to the fleet!
 		(link-goto: &quot;Continue&quot;, $passage)
 	]
 ]</tw-passagedata>
-<tw-passagedata pid="16" name="removeShip" tags="" position="300.0001,700">&lt;!-- expects lostShip to be populated before call --&gt;
+<tw-passagedata pid="8" name="removeShip" tags="" position="300,700">&lt;!-- expects lostShip to be populated before call --&gt;
 &lt;!-- having no ships left causes gameover --&gt;
 &lt;!-- this can be called to run using a simple (display: &lt;title&gt;) line --&gt;
 (if: $totalShips contains $lostShip)[
@@ -130,19 +124,22 @@ $newShip will be a fine addition to the fleet!
 ](else:)[
 	(print: &quot;$lostShip wasn&#39;t found in totalShips; this is probably a bug&quot;)
 ]</tw-passagedata>
-<tw-passagedata pid="17" name="test add ship" tags="" position="100,100">(set: $nextPassage to &quot;test add ship&quot;)
+<tw-passagedata pid="9" name="test add ship" tags="" position="150,250">(set: $nextPassage to &quot;test add ship&quot;)
 (link-goto: &quot;add ship&quot;, &quot;addShip&quot;)
 (link-repeat: &quot;remove ship&quot;)[(display: &quot;removeShip&quot;])]</tw-passagedata>
-<tw-passagedata pid="18" name="The beginning" tags="" position="500.0001,100">Welcome, Administrator, to your first day on the job! Fresh out of the Bureaucratic University of Reading, Education, Assimilation and Understanding, you are to take responsibility of a small collection of systems on a lonely spiral arm of the galaxy, acting as the local representative of the Galactic Bureaucracy. Maintain law and order, build up your worlds and fleets, and build yourself a legacy.
+<tw-passagedata pid="10" name="The beginning" tags="" position="500,100">Welcome, Administrator, to your first day on the job! Fresh out of the Bureaucratic University of Reading, Education, Assimilation and Understanding, you are to take responsibility of a small collection of systems on a lonely spiral arm of the galaxy, acting as the local representative of the Galactic Bureaucracy. Maintain law and order, build up your worlds and fleets, and build yourself a legacy.
 
 Within your realm your word is law, but you are answerable to the Bureaucracy; periodically they shall arive to collect their tithe from you. Make sure you have the funds to placate them!
 
 Around your throne in the Fortress of Government your acolytes and bureaucrats hustle too and fro, stacks of documents tottering in their arms. Attendants and representatives are approaching, each one responsible for different aspects of your administration.
 
 (link-goto: &quot;Let&#39;s get started then!&quot;, &quot;Auto Next Section&quot;)</tw-passagedata>
-<tw-passagedata pid="19" name="Introduction: Merchants" tags="" position="700,100">A regally rotund gentleman approaches, reclining upon a sled festooned with robotic legs that carry him towards you. One hand rests by a guilded food despenser crafted to look like some antique fruit bowl, and an incense burner surrounds the contraption with curls of dry-smelling smoke.
+<tw-passagedata pid="11" name="Introduction: Merchants" tags="" position="700,100">{
+(set: $storySections to $storySections + (a: &quot;Merchant favour 1&quot;))
+}
+A regally rotund gentleman approaches, reclining upon a sled festooned with robotic legs that carry him towards you. One hand rests by a guilded food despenser crafted to look like some antique fruit bowl, and an incense burner surrounds the contraption with curls of dry-smelling smoke.
 
-An aid introduces him; Lord Mendant, representative of the interests of the merchants within your sector.
+An aid introduces him; &#39;&#39;Lord Mendant&#39;&#39;, representative of the interests of the Guild of Sancified Merchants. He represents the interest of all registered merchants and traders in your sector.
 
 &quot;Ah, Administrator,&quot; he begins, &quot;I am so pleased to meet you!  Your predecessor and I got along famously, and I hope that you and I shall also have a mutually beneficial arrangement!&quot;
 
@@ -152,20 +149,130 @@ He hands a chit to the aid to present to you.
 
 [[Accept the gift|Merchant Accept Gift]]
 [[Reject the gift|Merchant Reject Gift]]</tw-passagedata>
-<tw-passagedata pid="20" name="Introduction: Politicians" tags="" position="1000,100">Double-click this passage to edit it.</tw-passagedata>
-<tw-passagedata pid="21" name="Merchant Accept Gift" tags="" position="700.0001,250">(display: &quot;addFunds&quot;)
+<tw-passagedata pid="12" name="Introduction: Politicians" tags="" position="1000,100">Double-click this passage to edit it.</tw-passagedata>
+<tw-passagedata pid="13" name="Merchant Accept Gift" tags="" position="700,250">{
+(display: &quot;addFunds&quot;)
 (set: $standingMerchants = $standingMerchants + 1)
-Double-click this passage to edit it.</tw-passagedata>
-<tw-passagedata pid="22" name="Merchant Reject Gift" tags="" position="850.0001,250">(display: &quot;addReputation&quot;)
-Double-click this passage to edit it.</tw-passagedata>
-<tw-passagedata pid="23" name="addFunds" tags="" position="300.0001,850">&lt;!-- this can be called to run using a simple (display: &lt;title&gt;) line --&gt;
+}
+&#39;&#39;Lord Mendant&#39;&#39;&#39;s face creases in a broad smile. 
+
+&quot;Excellent! Here&#39;s to the start of an excellent working relationship, Administrator! I&#39;ll be sure to put a good word in on your behalf with the Guild.&quot;
+
+His sled&#39;s legs rotate smartly on their ankles and bear him backwards out of the chamber with a cheery wave.
+
+(link-goto: &quot;Who do we have next?&quot;, &quot;Auto Next Section&quot;)</tw-passagedata>
+<tw-passagedata pid="14" name="Merchant Reject Gift" tags="" position="850,250">{
+(display: &quot;addReputation&quot;)
+}
+&#39;&#39;Lord Mendant&#39;&#39; masks his disappointment with a laugh, but you notice small gestures of approval from the way your aid straightens their papers.
+
+&quot;Very well, Administrator - I see I shall have to prove my value to you in other ways. By your leave I&#39;ll get back to my chambers to continue my work&quot;
+
+His sled&#39;s legs shuffle on the spot to rotate him until he&#39;s facing the exit, them march him stiffly away.
+
+(link-goto: &quot;Who do we have next?&quot;, &quot;Auto Next Section&quot;)</tw-passagedata>
+<tw-passagedata pid="15" name="addFunds" tags="" position="150,400">&lt;!-- this can be called to run using a simple (display: &lt;title&gt;) line --&gt;
 (set: $funds = $funds + 1)</tw-passagedata>
-<tw-passagedata pid="24" name="removeFunds" tags="" position="300.0001,1000">&lt;!-- this can be called to run using a simple (display: &lt;title&gt;) line --&gt;
+<tw-passagedata pid="16" name="removeFunds" tags="" position="150,550">&lt;!-- this can be called to run using a simple (display: &lt;title&gt;) line --&gt;
 (set: $funds = $funds - 1)
 (if: $funds &lt;= 0)[
-	(set: $gameoverReason to &quot;Your coffers are empty, your territory destitute. The Galactic Bureaucracy are not going to be pleased with you, and the fate of those that displease them on matters of money is said to be pretty unpleasant...&quot;)
+	(if: $gameoverReason == &quot;&quot;)[
+		(set: $gameoverReason to &quot;Your coffers are empty, your territory destitute. The Galactic Bureaucracy are not going to be pleased with you, and the fate of those that displease them on matters of money is said to be pretty unpleasant...&quot;)
+	]
+	(set: $gameoverReason to &quot;Your &#39;&#39;funds&#39;&#39; ran dry. \n&quot; + $gameoverReason)
 	(goto: gameover)
 ]</tw-passagedata>
+<tw-passagedata pid="17" name="Merchant favour 1" tags="" position="800,400">&#39;&#39;Lord Mendant&#39;&#39;&#39;s mechanical sled clatters in on its many legs.
+
+&quot;Administrator, please, I have a favour to beg of you. One of my business ventures has gone a little.. south, and now a whole planet is covered in self-replicating toy robots! If you can spare some &#39;&#39;funds&#39;&#39; to assist my cleanup operation, I would most greatly appreciate it. They whole situation is rather embarassing!&quot;
+
+[[Very well, your shall have your funds. | yes]]
+
+[[This is your mess! | no]]</tw-passagedata>
+<tw-passagedata pid="18" name=" yes" tags="" position="700,550">{
+(display: &quot;removeFunds&quot;)
+(set: $standingMerchants = $standingMerchants + 1)
+(set: $storySections = $storySections + (a: &quot;Toy Robot Plague A&quot;))
+}
+&quot;Thankyou, Administrator.&quot; Beams &#39;&#39;Lord Mendant&#39;&#39;, bowing his sled and hastily leaving, no doubt to spend your money fixing his mess.
+
+(link-goto: &quot;At least that planet will be sorted out.&quot;, &quot;Auto Next Section&quot;)</tw-passagedata>
+<tw-passagedata pid="19" name=" no" tags="" position="900,550">{
+(display: &quot;addReputation&quot;)
+(set: $standingMerchants = $standingMerchants - 1)
+(set: $storySections = $storySections + (a: &quot;Toy Robot Plague A&quot;))
+}
+&#39;&#39;Lord Mendant&#39;&#39; is visibily displeased, but behind him you see your accounting department share smiles.
+
+&quot;Very well, Administrator.  I shall resolve matters myself.&quot;
+
+(link-goto: &quot;A plague of toy robots? How odd.&quot;, &quot;Auto Next Section&quot;)</tw-passagedata>
+<tw-passagedata pid="20" name="sendShipOnMission" tags="" position="300,850">(if: $availableShips.length &gt; 0)[
+	(set: $ship = $availableShips.shift())
+	(set: $shipMissionQueue = $shipMissionQueue + (a: $ship))
+]</tw-passagedata>
+<tw-passagedata pid="21" name="shipMissionEnded" tags="" position="450,850">(if: $shipMissionQueue.length &gt; 0)[
+	(set: $ship = $shipMissionQueue.shift())
+	(if: (random: 1, 12) &lt;= $shipSurvival)[
+		(set: $availableShips = $availableShips + (a: $ship))
+		Good news, Administrator! The ship $ship has returned from its mission and is ready for a new assignment.
+
+		(link-goto: &quot;Excellent.&quot;, &quot;Auto Next Section&quot;)
+	](else:)[
+		(set: $totalShips = $totalShips - (a: $ship))
+		We&#39;ve received word that the ship $ship has been lost on its mission.
+
+		(link-goto: &quot;Tragic. And inconvenient.&quot;, &quot;Auto Next Section&quot;)
+	]
+]</tw-passagedata>
+<tw-passagedata pid="22" name="Construct New Ship" tags="" position="300,1000">{
+(set: $storySections to $storySections + (a: &quot;Construct New Ship&quot;))
+(set: $randomVar to (random:1, 5))
+}
+Administrator, the shipyards enquire if you would be willing to &#39;&#39;fund&#39;&#39; the construction of a new ship for your fleet?
+
+(if: $randomVar is 1)[
+They are having a lul in production, and the are offering to produce a vessel for &#39;&#39;half the normal funds&#39;&#39;.
+
+[[Sounds like a good opportunity!|Build Cheap Ship]]
+(link-goto: &quot;Not this time.&quot;, &quot;Auto Next Section&quot;)
+](else-if: $randomVar is 2)[
+They have a scheme for a most impressive vessel, one that would surely enhance your &#39;&#39;reputation&#39;&#39;, though it would require &#39;&#39;significant funding&#39;&#39;.
+
+[[Impressive indeed!  Make it so.|Build Impressive Ship]]
+(link-goto: &quot;I have no desire for such extravagance. No.&quot;, &quot;Auto Next Section&quot;)
+](else:)[
+Their shipyards stand ready for your order - and your &#39;&#39;funds&#39;&#39;.
+
+[[We can always use more ships|Build Ship]]
+(link-goto: &quot;Not this time.&quot;, &quot;Auto Next Section&quot;)
+]</tw-passagedata>
+<tw-passagedata pid="23" name="Build Cheap Ship" tags="" position="300,1150">{
+(set: $gameoverReason = &quot;Disappointment fills the faces of your accounting department as they realise that you can&#39;t afford even a cut-price ship. It won&#39;t take long before this turns to anger, and no wise Administrator remains to face riled-up accountants!  Flee whilst you still can!&quot;)
+(display: &quot;removeFunds&quot;)
+}
+She&#39;s a little spartan, but you can&#39;t complain about the rates!
+(link-goto: &quot;Launch the new ship.&quot;, &quot;addShip&quot;)</tw-passagedata>
+<tw-passagedata pid="24" name="Build Impressive Ship" tags="" position="450,1150">{
+(set: $gameoverReason = &quot;Raging protest have surrounded your palace for days as the news of your lavish expenditure filtered out even as the economy disintegrated around you, led by your furious accounting department. Your resignation is demanded.&quot;)
+(display: &quot;removeFunds&quot;)
+(display: &quot;removeFunds&quot;)
+(display: &quot;removeFunds&quot;)
+(display: &quot;addReputation&quot;)
+}
+This vessel is truely be a wonderful addition to the fleet! You can hear awed whispers from the acolytes at their stations around you.  Worth every penny.
+(link-goto: &quot;Launch the new ship.&quot;, &quot;addShip&quot;)</tw-passagedata>
+<tw-passagedata pid="25" name="Build Ship" tags="" position="450,1000">{
+(set: $gameoverReason = &quot;Accounting swiftly moved to kick you out of your palatial estate and begin searching for your successor.&quot;)
+(display: &quot;removeFunds&quot;)
+(display: &quot;removeFunds&quot;)
+}
+Solid and space-ready, this ship will be a fine addition to your fleet.
+(link-goto: &quot;Launch the new ship.&quot;, &quot;addShip&quot;)</tw-passagedata>
+<tw-passagedata pid="26" name="Toy Robot Plague A" tags="" position="700,700">Double-click this passage to edit it.
+(link-goto: &quot;Continue&quot;, &quot;Auto Next Section&quot;)</tw-passagedata>
+<tw-passagedata pid="27" name="Toy Robot Plague B" tags="" position="900,700">Double-click this passage to edit it.
+(link-goto: &quot;Continue&quot;, &quot;Auto Next Section&quot;)</tw-passagedata>
 </tw-storydata>
 
 
