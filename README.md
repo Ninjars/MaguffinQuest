@@ -1,0 +1,10 @@
+# MaguffinQuest
+Experiments with Twine
+
+The core idea here inspired by Reigns, namely to create a procedural story from a 'card' based metaphore.  Decisions made can add single, multiple or no cards to the deck, and once the current card has been resolved a new one is drawn at random.
+
+The setting I started to use was that of managing a space empire (because I like space entirely too much), where rather than control things directly you just issue orders and shape policy.  The underlying gameplay mechanic is about decision points building your future deck: giving support to the merchants guild would add cards to the deck that improve your income but also cards with negative repercussions from corruption, and depending on how you resolved those cards (or perhaps what attributes you'd gained from other decisions) the stacking of the deck could lean one way or another.
+
+A secondary mechanic to introduce more seeding cards to the deck was from the ships.  You would have a limited number of ships which you could send out on missions.  The ships could be lost on mission (though that may be too limiting a mechanic if insufficient weighting was given to restoring the fleet), but they can also generate new cards, eg discovering other star systems or entering into conflict with another civilisation that would give your deck new options and open up new story lines.
+
+The foremost tricky part about this game design is the writing.  Its easy to get inspiration for a verbose card or two then to not have a solid idea for another, so the proper thing to do might be to mock out a reasonably involved prototype deck with sufficient complexity to explore the interactions and gameplay loops, using cards with just a skeleton of a decision on them.  Having got the core technical components working and having sussed out some of the idiosyncrasies of Twine, I kinda lost interest in the labour intensive task of building the cards needed to power the engine.  Oh well, it was fun figuing out the logic of the deck suffling and stat tracking systems!
